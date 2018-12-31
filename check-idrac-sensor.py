@@ -6,7 +6,7 @@ import argparse
 import re
 import json
 import time
-
+import paramiko
 
 def build_parser():
     parser = argparse.ArgumentParser(description='Check iDRAC Sensors')
@@ -19,10 +19,7 @@ def build_parser():
         '-p', '--password', required=True, type=str, dest='password')
     parser.add_argument(
         '-a', '--authfile', required=False, type=str, dest='authfile')
-    # Root racadm command - currently only getsensorinfo is supported
-    parser.add_argument('-C', '--command', required=False,
-                        type=str, dest='cmd', default="getsensorinfo")
-    # Include perfdata in output? True or False
+
     parser.add_argument(
         '-f', '--perfdata', required=False, type=bool, dest='perfdata', default=False)
     # Use 'all' to return data for all sensor types at once
@@ -39,76 +36,45 @@ def build_parser():
 def main():
     global debug
 
-    if not racadm_exists():
-        print "ERROR: 'racadm' not found. If it's installed, try a symlink to /sbin:\nln -s /opt/dell/srvadmin/sbin/racadm /sbin/racadm\n"
-        sys.exit(3)
-
     parser = build_parser()
     args = parser.parse_args()
 
     debug = args.debug
+    valid_sensors = ['battery', 'current', 'intrusion', 'memory', 'power', 'temperature', 'fan',
+                         'performance', 'processor', 'redundancy', 'system_performance', 'voltage', 'all']
 
-    if validate_arguments(args):
+    if args.sensor in valid_sensors:
+
         host = args.host
         user = args.username
         password = args.password.strip("'").replace('\\', '')
 
         perfdata = args.perfdata
-        command = args.cmd
+
         sensor = args.sensor
         start = time.time()
-        sensor_data = query_idrac(host, user, password, command)
-
-        if debug:
-            print sensor_data
+        
+        sensor_data = ssh_connect(host, user, password, "racadm getsensorinfo")
 
         if sensor_data:
-            parsed = sections_to_dict(sensor_data)
+            formatted_out = lines_to_dict(sensor_data)
+            sensors_text = nagios_output(formatted_out, sensor, perfdata)
 
             if debug:
-                print json.dumps(parsed, sort_keys=True, indent=4)
+                print json.dumps(formatted_out, sort_keys=True, indent=4)
 
-            print nagios_output(parsed, sensor, perfdata)
+            if sensors_text:
+                return sensors_text
+
         else:
             print "No response from iDRAC!"
+            sys.exit(3)
     else:
         print "ERROR: Invalid command or sensortype. Please check that command or sensortype is valid. Exiting...\n"
         sys.exit(3)
 
-
-def clean_lines(data):
-    cleaned = []
-    for line in data:
-        if line:
-            cleaned.append(line)
-
-    return cleaned
-
-
-def clean_headings(data):
-    cleaned = []
-    for line in data:
-        if line.strip():
-            l = line.replace('<', '').strip()
-            cleaned.append(l.lower())
-
-    return cleaned
-
-
-def clean_top_section(section):
-    lines = ''
-    data = section.split('\r\n')
-    for line in data:
-        if line:
-            line = re.sub('\[.+?\]', '', line)
-            lines += line + '\r\n'
-
-    return lines
-
-
 def format_sensor(sensor):
     return sensor.strip().lower().replace(' ', '_')
-
 
 def set_sensor_info(lines):
     try:
@@ -120,70 +86,104 @@ def set_sensor_info(lines):
 
     return sensor, headings
 
+# Extract output lines and format a huge dict with all sensors informations
+def lines_to_dict(lines):
+    sensors = {}
+    match = False
+    g = ""
+    for line in lines:
+        m = re.match("Sensor\sType\s:\s([A-Z\s]+)", line)
+        if m:
+            match = True
+            g = m.groups()[0].strip()
+            sensors[g] = {}
+        elif re.findall('^\<|^\[',line):
+            # Jump if line starts with junk < or [
+            continue
+        else:
+            sections = []
+            sections = [x.strip() for x in line.split('  ') if x.strip()]
+            if sections:
+                s = sections.pop(0)
+                sensors[g][s] = sections
+    return sensors
 
-def sections_to_dict(sensor_data):
-    '''Parse sensor info sections into multi-dimensional dict'''
-    organized = dict()
-    # Sections are separated on double return/newline, so split that way
-    all_sections = sensor_data.split('\r\n\r\n')
+#Ugly sensor output
+def dump_sensors(sensors):
+        for s,a in sensors.items():
+            print "ITEM = %s" % s
+            for b,c in a.items():
+                print "\t * %s" % b
+                for d in c:
+                    print "\t\t - %s" %d
 
-    main_sections = all_sections[1:]
-    top_section = clean_top_section(all_sections[0].split('\r\r\n')[1])
-    main_sections.append(top_section)
+# Each sensors should have a matching function to format the results
+def redundancy(status):
+    redundancy_out = ''
+    for n, a in sorted(status.items()):
+        if "Full Redundant" in a:
+            redundancy_out += '- %s : is Ok ' % n
+    return redundancy_out
 
-    for section in main_sections:
-        # Lines separated by return + newline, so split on that
-        lines = section.split('\r\n')
-        if len(lines) > 0:
-            try:
-                # Format headings and pull sensor names
-                sensor, headings = set_sensor_info(lines)
-                organized[sensor] = organized.get(sensor, {})
-            except:
-                # Section is invalid (usually blank) so skip it
-                continue
+def power(status):
+    power_out = ''
+    for n, a in sorted(status.items()):
+        if "Present" == a[0]:
+            power_out += "- %s : is Ok " % n
+    return power_out
 
-            for line in lines:
-                if 'Sensor Type' not in line and '<' not in line:
-                    if line and len(headings) > 0:
-                        # Split readings into list on multiple spaces as some
-                        # sensor names have single spaces
-                        readings = [s.strip()
-                                    for s in line.split('  ') if s.strip()]
-                        if len(readings) > 0:
-                            sensor_name = readings[0].replace(' ', '_').lower()
+def memory(status):
+    memory_out = ''
+    for n, a in sorted(status.items()):
+        if "Presence_Detected" == a[1]:
+            memory_out += "- %s is %s " % (n, a[0])
+    return memory_out
 
-                        i = 0
-                        parsed = {}
-                        for reading in readings:
-                            # Append formatted readings to sensor type dict
-                            sensor_type = headings[i]
-                            if reading and i > 0:
-                                reading = re.sub('[\s+]', '', reading)
-                                if sensor in ['fan', 'temperature']:
-                                    reading = re.sub("[^0-9]", "", reading)
+def intrusion(status):
+    intrusion_out = ''
+    for n, a in sorted(status.items()):
+        if "Closed" == a[0]:
+            intrusion_out += "- %s is Ok " % (n)
+    return intrusion_out
 
-                                parsed[sensor_type] = reading
+# Generic status retriever no further formating is required
+def sensor_generic(status):
+    sensor_generic = ''
+    for n, a in sorted(status.items()):
+        sensor_generic += "- %s=%s is %s " % (n, a[1], a[0])
+    return sensor_generic
 
-                            i += 1
-
-                        if parsed:
-                            # Append parsed section to multidimensional dict
-                            # 'organized'
-                            organized[sensor][sensor_name] = parsed
-
-    return organized
-
-
+#Generate text output icinga/nagios formatted
 def nagios_output(sensor_data, sensor, perfdata):
-    '''provide Nagios output for check results'''
+    '''Provide Nagios output for check results'''
+
+    #Pointer function like map
+    funct_map = {
+        'redundancy': redundancy,
+        'temperature': sensor_generic,
+        'power': power,
+        'battery': sensor_generic,
+        'system_performance': sensor_generic,
+        'current': sensor_generic,
+        'fan': sensor_generic,
+        'voltage': sensor_generic,
+        'memory': memory,
+        'performance': sensor_generic,
+        'intrusion': intrusion,
+        'processor': sensor_generic
+
+    }
+
     output = ''
     if sensor == 'all':
-        for s, desc in sensor_data.iteritems():
-            for k, v in desc.iteritems():
-                if v['status'] and v['status'] is not 'N\A':
-                    status = v['status'].upper()
-                    output += "%s - %s;" % (k, status)
+        #dump_sensors(sensor_data)
+        for item_name, sensor in sensor_data.items():
+            output += "[%s] " % item_name
+            try:
+                output += funct_map[item_name.lower().replace(' ','_')](sensor)
+            except Exception as e:
+                print "%s" % e
+                pass
     else:
         status = sensor_data[sensor]['status'].upper()
 
@@ -195,21 +195,11 @@ def nagios_output(sensor_data, sensor, perfdata):
 
     return output
 
-
-def compile_sensordata(sensor_data, sensor):
-    status = ''
-    for s, subs in sensor_data.iteritems():
-        print s
-
-
 def validate_arguments(args):
     '''make sure command is valid'''
 
     validate = [args.cmd, args.sensor]
 
-    valid_commands = ['getsensorinfo', 'raid']
-    valid_sensortypes = ['battery', 'current', 'intrusion', 'memory',
-                         'performance', 'processor', 'redundancy', 'sd_card', 'voltage', 'all']
 
     validated = {}
     for option in validate:
@@ -223,31 +213,8 @@ def validate_arguments(args):
     else:
         return True
 
-
 def clean_bracket_content(data):
     return re.sub("\[.*?\]", '', data)
-
-
-def query_idrac(host, user, password, command):
-    '''query iDRAC'''
-    command = "racadm -r %s -u %s -p %s %s" % (host, user, password, command)
-    rcode, output, error = exec_command(command)
-
-    if rcode and error:
-        error = re.sub('ERROR:\s', '', error)
-        print "ERROR: encountered a problem running racadm command. " + str(error) + "\n"
-        sys.exit(3)
-    else:
-        return output
-
-
-def racadm_exists():
-    rcode, output, error = exec_command('which racadm')
-    if rcode is 0 and output != '':
-        return True
-    else:
-        return False
-
 
 def exec_command(command):
     """Execute command.
@@ -260,7 +227,34 @@ def exec_command(command):
     output, err_msg = sub_p.communicate()
     return (sub_p.returncode, output, err_msg)
 
+def ssh_connect(host, user, password, command):
+    ret_val = []
+    try:
+        drac_con = paramiko.SSHClient()
+        drac_con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        drac_con.connect(host, username=user, password=password)
+        stdin, stdout, stderr = drac_con.exec_command(command)
+        stdin.close()
+        for line in stdout.readlines():
+            ret_val.append(line)
+
+        return ret_val
+    except Exception as e:
+        print "UNKNOWN: Unable to run ssh racadm by SSH:  %s" % e
+        sys.exit(3)
+
 
 if __name__ == "__main__":
-    main()
+    sensors_text = main()
+
+    # Let's take care of Nagios / Icinga statutes
+    # Just match Warning/Critical in output messages
+    if re.findall('Critical', sensors_text):
+        print "CRITICAL: %s" % sensors_text
+        sys.exit(2)
+    elif re.findall('Warning',sensors_text):
+        print "WARNING: %s" % sensors_text
+        print sys.exit(1)
+    else:
+        print "OK: %s" % sensors_text
     sys.exit(0)
