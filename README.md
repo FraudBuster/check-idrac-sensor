@@ -1,28 +1,15 @@
 # check-idrac-sensor
 
-Nagios check script utilizing racadm to check getsensorinfo endpoint
+Nagios check script utilizing racadm by ssh to check getsensorinfo endpoint
 
 ## Purpose
 
-This check script uses racadm to check sensorinfo output from a Dell iDRAC
+This check script uses racadm by to check sensorinfo output from a Dell iDRAC
 
 ## Requirements
 
-This check script requires the racadm tool. To install it:
+paramiko ssh library
 
-```
-wget -q -O - http://linux.dell.com/repo/hardware/latest/bootstrap.cgi | bash
-```
-```
-sudo apt-get update
-sudo apt-get install srvadmin-idrac7
-```
-
-OR
-
-```
-sudo yum install srvadmin-idrac7
-```
 ## Installation
 
 Clone the repo and move the check-idrac-sensor.py script to your Nagios plugin directory
@@ -36,7 +23,7 @@ Perfdata does not yet return anything and authfile feature is not yet implemente
 ./check-idrac-sensor.py -H 192.168.1.120 -u root -p calvin
 
 usage: check-idrac-sensor.py [-h] -H HOST -u USERNAME -p PASSWORD
-                             [-a AUTHFILE] [-C CMD] [-f PERFDATA] [-s SENSOR]
+                             [-a AUTHFILE] [-f PERFDATA] [-s SENSOR]
                              [-d DEBUG]
 ```
 
@@ -46,9 +33,8 @@ usage: check-idrac-sensor.py [-h] -H HOST -u USERNAME -p PASSWORD
 
 ## Known Issues / Compatibility
 
-- Sometimes racadm responds with bad username/password when it is really a response issue with the device. Common on older firmware versions. 
-- This has only been tested on iDRAC7
-- Authfile and perfdata are options but not yet implemented
+- Tested only on latest idrac version by ssh (8/9)
+- Perfdata are options but not yet implemented
 
 ## TODO
 
