@@ -1,10 +1,13 @@
 # check-idrac-sensor
 
-Nagios check script utilizing racadm by ssh to check getsensorinfo endpoint
+Forked and reworked from https://github.com/hobbsh/check-idrac-sensor
+
+Icinga / nagios check script utilizing racadm by ssh to check getsensorinfo endpoint
 
 ## Purpose
 
-This check script uses racadm by to check sensorinfo output from a Dell iDRAC
+This check script uses racadm thought ssh, to check sensorinfo output from a Dell iDRAC without any 
+further dependencies except paramiko.
 
 ## Requirements
 
@@ -12,19 +15,17 @@ paramiko ssh library
 
 ## Installation
 
-Clone the repo and move the check-idrac-sensor.py script to your Nagios plugin directory
+Clone the repo and move the check-idrac-sensor.py script to your Icinga / Nagios plugin directory
 
 ## Usage
 
-Below is the minimal usage. The default command (-C) is "getsensorinfo" and default sensors (-s) are "all".
-Perfdata does not yet return anything and authfile feature is not yet implemented. 
+Below is the minimal usage. The default sensors (-s) are "all".
 
 ```
-./check-idrac-sensor.py -H 192.168.1.120 -u root -p calvin
+./check-idrac-sensor.py -H 192.168.1.120:22 -u root -p calvin
 
-usage: check-idrac-sensor.py [-h] -H HOST -u USERNAME -p PASSWORD
-                             [-a AUTHFILE] [-f PERFDATA] [-s SENSOR]
-                             [-d DEBUG]
+usage: check-idrac-sensor.py [-h] -H HOST:PORT -u USERNAME -p PASSWORD
+                             [-s SENSOR] [-d DEBUG]
 ```
 
 ## Bugs
@@ -33,11 +34,4 @@ usage: check-idrac-sensor.py [-h] -H HOST -u USERNAME -p PASSWORD
 
 ## Known Issues / Compatibility
 
-- Tested only on latest idrac version by ssh (8/9)
-- Perfdata are options but not yet implemented
-
-## TODO
-
-- Perfdata for certain sensortypes
-- Handle some of the failure cases better
-- Implement single/multi sensor return (as opposed to just 'all')
+- Tested only on latest iDRAC version by ssh (8/9)
