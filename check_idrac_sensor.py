@@ -75,30 +75,15 @@ def main():
         sys.exit(3)
 
 
-def exec_command(command):
-    """Execute command.
-       Return a tuple: returncode, output and error message(None if no error).
-    """
-    sub_p = subprocess.Popen(command,
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-    output, err_msg = sub_p.communicate()
-    return (sub_p.returncode, output, err_msg)
-
-
 def ssh_connect(host, user, password, command):
-    ret_val = []
     try:
         drac_con = paramiko.SSHClient()
         drac_con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         drac_con.connect(host, username=user, password=password)
         stdin, stdout, stderr = drac_con.exec_command(command)
         stdin.close()
-        for line in stdout.readlines():
-            ret_val.append(line)
 
-        return ret_val
+        return stdout.readlines()
     except Exception as e:
         print "UNKNOWN: Unable to run ssh racadm by SSH:  %s" % e
         sys.exit(3)
