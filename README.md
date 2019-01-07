@@ -1,4 +1,5 @@
 # check-idrac-sensor
+[![Build Status](https://travis-ci.com/lagooj/check-idrac-sensor.svg?branch=master)](https://travis-ci.com/lagooj/check-idrac-sensor)
 
 Forked and reworked from https://github.com/hobbsh/check-idrac-sensor
 
