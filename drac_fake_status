@@ -1,0 +1,140 @@
+Sensor Type : POWER
+<Sensor Name>                   <Status>                 <Type>         
+PS1 Status                      Present                  AC             
+PS2 Status                      Present                  AC             
+
+Sensor Type : TEMPERATURE
+<Sensor Name>            <Status>    <Reading> <lc> <uc>  <lnc>[R/W]  <unc>[R/W]
+[Key = iDRAC.Embedded.1#SystemBoardInletTemp]
+System Board Inlet Temp       Ok      19C      -7C  47C      3C [Y]      42C [Y]
+
+[Key = iDRAC.Embedded.1#SystemBoardExhaustTemp]
+System Board Exhaust Temp     Ok      29C      0C   75C      0C [N]      70C [N]
+
+[Key = iDRAC.Embedded.1#CPU1Temp]
+CPU1 Temp                     Ok      41C      3C   103C     8C [N]      98C [N]
+
+[Key = iDRAC.Embedded.1#CPU2Temp]
+CPU2 Temp                     Ok      40C      3C   103C     8C [N]      98C [N]
+
+
+
+Sensor Type : FAN
+<Sensor Name>                   <Status>    <Reading>   <lc>        <uc>        <PWM %>     
+System Board Fan1               Ok          3960RPM     360RPM      NA          12%         
+System Board Fan2               Ok          3960RPM     360RPM      NA          12%         
+System Board Fan3               Ok          3960RPM     360RPM      NA          12%         
+System Board Fan4               Ok          3840RPM     360RPM      NA          12%         
+System Board Fan5               Ok          3960RPM     360RPM      NA          12%         
+System Board Fan6               Ok          3840RPM     360RPM      NA          12%         
+
+Sensor Type : VOLTAGE
+<Sensor Name>                   <Status>    <Reading>   <lc>        <uc>        
+CPU1 VCORE PG                   Ok          Good                NA          NA          
+CPU2 VCORE PG                   Ok          Good                NA          NA          
+System Board 3.3V PG            Ok          Good                NA          NA          
+System Board 5V AUX PG          Ok          Good                NA          NA          
+CPU2 M23 VPP PG                 Ok          Good                NA          NA          
+CPU1 M23 VPP PG                 Ok          Good                NA          NA          
+System Board 1.05V PG           Ok          Good                NA          NA          
+CPU1 M23 VDDQ PG                Ok          Good                NA          NA          
+CPU1 M23 VTT PG                 Ok          Good                NA          NA          
+System Board 5V SWITCH PG       Ok          Good                NA          NA          
+System Board VCCIO PG           Ok          Good                NA          NA          
+System Board 2.5V AUX PG        Ok          Good                NA          NA          
+CPU2 M01 VDDQ PG                Ok          Good                NA          NA          
+CPU1 M01 VDDQ PG                Ok          Good                NA          NA          
+CPU2 M23 VTT PG                 Ok          Good                NA          NA          
+CPU2 M01 VTT PG                 Ok          Good                NA          NA          
+System Board NDC PG             Ok          Good                NA          NA          
+CPU2 M01 VPP PG                 Ok          Good                NA          NA          
+CPU1 M01 VPP PG                 Ok          Good                NA          NA          
+CPU2 M23 VDDQ PG                Ok          Good                NA          NA          
+System Board 1.5V PG            Ok          Good                NA          NA          
+System Board PS2 PG Fail        Ok          Good                NA          NA          
+System Board PS1 PG Fail        Ok          Good                NA          NA          
+System Board BP1 5V PG          Ok          Good                NA          NA          
+System Board 1.5V AUX PG        Ok          Good                NA          NA          
+CPU1 M01 VTT PG                 Ok          Good                NA          NA          
+PS1 Voltage 1                   Ok          218.00V             NA          NA          
+PS2 Voltage 2                   Ok          228.00V             NA          NA          
+System Board DIMM PG            Ok          Good                NA          NA          
+CPU1 FIVR PG                    Ok          Good                NA          NA          
+CPU2 FIVR PG                    Ok          Good                NA          NA          
+
+Sensor Type : CURRENT
+<Sensor Name>            <Status>    <Reading> <lc> <uc>  <lnc>[R/W]  <unc>[R/W]
+[Key = iDRAC.Embedded.1#PS1Current1]
+PS1 Current 1                 Ok      0.6Amps  NA   NA       0Amps [N]      0Amps [N]
+
+[Key = iDRAC.Embedded.1#PS2Current2]
+PS2 Current 2                 Ok      0.2Amps  NA   NA       0Amps [N]      0Amps [N]
+
+[Key = iDRAC.Embedded.1#SystemBoardPwrConsumption]
+System Board Pwr Consumption  Ok      140Watts NA   980Watts 0Watts [N]      896Watts [Y]
+
+
+Sensor Type : PROCESSOR
+<Sensor Name>                   <Status>    <State>             <lc>        <uc>        
+CPU1 Status                     Ok          Presence_Detected   NA          NA          
+CPU2 Status                     Ok          Presence_Detected   NA          NA          
+
+Sensor Type : MEMORY
+<Sensor Name>                   <Status>    <State>             <lc>        <uc>        
+DIMM A1                         Warning     Presence_Detected   NA          NA          
+DIMM A2                         N/A         Absent              NA          NA          
+DIMM A3                         N/A         Absent              NA          NA          
+DIMM A4                         N/A         Absent              NA          NA          
+DIMM A5                         N/A         Absent              NA          NA          
+DIMM A6                         N/A         Absent              NA          NA          
+DIMM A7                         N/A         Absent              NA          NA          
+DIMM A8                         N/A         Absent              NA          NA          
+DIMM A9                         N/A         Absent              NA          NA          
+DIMM A10                        N/A         Absent              NA          NA          
+DIMM A11                        N/A         Absent              NA          NA          
+DIMM A12                        N/A         Absent              NA          NA          
+DIMM B1                         Ok          Presence_Detected   NA          NA          
+DIMM B2                         N/A         Absent              NA          NA          
+DIMM B3                         N/A         Absent              NA          NA          
+DIMM B4                         N/A         Absent              NA          NA          
+DIMM B5                         N/A         Absent              NA          NA          
+DIMM B6                         N/A         Absent              NA          NA          
+DIMM B7                         N/A         Absent              NA          NA          
+DIMM B8                         N/A         Absent              NA          NA          
+DIMM B9                         N/A         Absent              NA          NA          
+DIMM B10                        N/A         Absent              NA          NA          
+DIMM B11                        N/A         Absent              NA          NA          
+DIMM B12                        N/A         Absent              NA          NA          
+
+Sensor Type : BATTERY
+<Sensor Name>                   <Status>    <Reading>   <lc>        <uc>        
+System Board CMOS Battery       Ok          Present             NA          NA          
+PERC1 ROMB Battery              Ok          Present             NA          NA          
+
+Sensor Type : PERFORMANCE
+<Sensor Name>                   <Status>    <State>        <lc>      <uc>      
+System Board Power Optimized    Ok          Not Degraded   NA        NA        
+
+Sensor Type : INTRUSION
+<Sensor Name>                   <Intrusion>    <Status>       
+System Board Intrusion          Closed         Power ON       
+
+Sensor Type : REDUNDANCY
+<Sensor Name>                   <Status>                 <Type>         
+System Board Fan Redundancy     Full Redundant           Fan            
+System Board PS Redundancy      Full Redundant           PSU            
+
+Sensor Type : SYSTEM PERFORMANCE
+<Sensor Name>            <Status>    <Reading> <lc> <uc>  <lnc>[R/W]  <unc>[R/W]
+[Key = iDRAC.Embedded.1#SystemBoardCPUUsage]
+System Board CPU Usage   Ok             14%     NA  NA    NA  [N]      101% [Y]
+
+[Key = iDRAC.Embedded.1#SystemBoardIOUsage]
+System Board IO Usage    Ok             0%      NA  NA    NA  [N]      101% [Y]
+
+[Key = iDRAC.Embedded.1#SystemBoardMEMUsage]
+System Board MEM Usage   Ok             0%      NA  NA    NA  [N]      101% [Y]
+
+[Key = iDRAC.Embedded.1#SystemBoardSYSUsage]
+System Board SYS Usage   Ok             14%     NA  NA    NA  [N]      101% [Y]
+
