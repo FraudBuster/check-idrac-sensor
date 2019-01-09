@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
-import subprocess
 import sys
 import argparse
 import re
 import json
-import time
 import paramiko
 
 
@@ -26,7 +24,6 @@ def build_parser():
 
 
 def main():
-    global debug
 
     parser = build_parser()
     args = parser.parse_args()
@@ -62,16 +59,16 @@ def main():
             sensors_text = nagios_output(formatted_out, sensor)
 
             if debug:
-                print json.dumps(formatted_out, sort_keys=True, indent=4)
+                print(json.dumps(formatted_out, sort_keys=True, indent=4))
 
             if sensors_text:
                 return sensors_text
 
         else:
-            print "No response from iDRAC!"
+            print("No response from iDRAC!")
             sys.exit(3)
     else:
-        print "ERROR: Invalid command or sensortype. Please check that command or sensortype is valid. Exiting...\n"
+        print("ERROR: Invalid command or sensortype. Please check that command or sensortype is valid. Exiting...")
         sys.exit(3)
 
 
@@ -85,7 +82,7 @@ def ssh_connect(host, user, password, command):
 
         return stdout.readlines()
     except Exception as e:
-        print "UNKNOWN: Unable to run ssh racadm by SSH:  %s" % e
+        print("UNKNOWN: Unable to run ssh racadm by SSH:  {}".format(e))
         sys.exit(3)
 
 
@@ -95,12 +92,12 @@ def lines_to_dict(lines):
     match = False
     g = ""
     for line in lines:
-        m = re.match("Sensor\sType\s:\s([A-Z\s]+)", line)
+        m = re.match("Sensor\\sType\\s:\\s([A-Z\\s]+)", line)
         if m:
             match = True
             g = m.groups()[0].strip().replace(' ', '_')
             sensors[g] = {}
-        elif re.findall('^\<|^\[', line):
+        elif re.findall('^\\<|^\\[', line):
             # Jump if line starts with junk as < or [
             continue
         else:
@@ -114,11 +111,11 @@ def lines_to_dict(lines):
 # Ugly sensor output
 def dump_sensors(sensors):
     for item_name, sensor_arr in sensors.items():
-        print "ITEM = %s" % item_name
+        print("ITEM = {}".format(item_name))
         for sensor_name,  sensor_values in sensor_arr.items():
-            print "\t * %s" % sensor_name
+            print("\t * {}".format(sensor_name))
             for value in sensor_values:
-                print "\t\t - %s" % value
+                print("\t\t - {}".format(value))
 
 
 # Each sensors should have a matching function to format the results
@@ -202,11 +199,11 @@ if __name__ == "__main__":
     # Let's take care of Nagios / Icinga statutes
     # Just match Warning/Critical in output messages
     if re.findall('Critical', sensors_text):
-        print "CRITICAL: %s" % sensors_text
+        print("CRITICAL: {}".format(sensors_text))
         sys.exit(2)
     elif re.findall('Warning', sensors_text):
-        print "WARNING: %s" % sensors_text
-        print sys.exit(1)
+        print("WARNING: {}".format(sensors_text))
+        sys.exit(1)
     else:
-        print "OK: %s" % sensors_text
+        print("OK: {}".format(sensors_text))
     sys.exit(0)
