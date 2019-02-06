@@ -36,3 +36,4 @@ usage: check-idrac-sensor.py [-h] -H HOST:PORT -u USERNAME -p PASSWORD
 ## Known Issues / Compatibility
 
 - Tested only on latest iDRAC version by ssh (8/9)
+- Python2/3 compatible
