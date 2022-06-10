@@ -11,6 +11,7 @@ def build_parser():
 
     parser = argparse.ArgumentParser(description='Check iDRAC Sensors')
     parser.add_argument('-H', '--host', required=True, type=str, dest='host')
+    parser.add_argument('-P', '--port', required=False, type=int, dest='port', default=22)
     parser.add_argument(
             '-u', '--username', required=True, type=str, dest='username')
     parser.add_argument(
@@ -48,11 +49,12 @@ def main():
     if args.sensor in valid_sensors:
 
         host = args.host
+        port = args.port
         user = args.username
         password = args.password.strip("'").replace('\\', '')
         sensor = args.sensor
 
-        sensor_data = ssh_connect(host, user, password, "racadm getsensorinfo")
+        sensor_data = ssh_connect(host, port, user, password, "racadm getsensorinfo")
 
         if sensor_data:
             formatted_out = lines_to_dict(sensor_data)
@@ -72,11 +74,11 @@ def main():
         sys.exit(3)
 
 
-def ssh_connect(host, user, password, command):
+def ssh_connect(host, port, user, password, command):
     try:
         drac_con = paramiko.SSHClient()
         drac_con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        drac_con.connect(host, username=user, password=password)
+        drac_con.connect(host, port=port, username=user, password=password)
         stdin, stdout, stderr = drac_con.exec_command(command)
         stdin.close()
 

@@ -24,10 +24,10 @@ Clone the repo and move the check-idrac-sensor.py script to your Icinga / Nagios
 Below is the minimal usage. The default sensors (-s) are "all".
 
 ```
-./check-idrac-sensor.py -H 192.168.1.120:22 -u root -p calvin
+check_idrac_sensor.py -H 192.168.1.120 -u root -p calvin
 
-usage: check-idrac-sensor.py [-h] -H HOST:PORT -u USERNAME -p PASSWORD
-                             [-s SENSOR] [-d DEBUG]
+usage: check_idrac_sensor.py -H host [-P port] -u username -p password
+                             [-s sensor] [-d debug]
 ```
 
 ## Bugs
@@ -36,5 +36,5 @@ usage: check-idrac-sensor.py [-h] -H HOST:PORT -u USERNAME -p PASSWORD
 
 ## Known Issues / Compatibility
 
-- Tested only on latest iDRAC version by ssh (8/9)
+- This shoud work on iDRAC 7/8/9
 - Python2/3 compatible
