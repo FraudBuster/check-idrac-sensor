@@ -12,14 +12,10 @@ def build_parser():
     parser = argparse.ArgumentParser(description='Check iDRAC Sensors')
     parser.add_argument('-H', '--host', required=True, type=str, dest='host')
     parser.add_argument('-P', '--port', required=False, type=int, dest='port', default=22)
-    parser.add_argument(
-            '-u', '--username', required=True, type=str, dest='username')
-    parser.add_argument(
-            '-p', '--password', required=True, type=str, dest='password')
-    parser.add_argument(
-            '-s', '--sensortype', required=False, type=str, dest='sensor', default='all')
-    parser.add_argument(
-            '-d', '--debug', required=False, type=bool, dest='debug', default=False)
+    parser.add_argument('-u', '--username', required=True, type=str, dest='username')
+    parser.add_argument('-p', '--password', required=True, type=str, dest='password')
+    parser.add_argument('-s', '--sensortype', required=False, type=str, dest='sensor', default='all')
+    parser.add_argument('-d', '--debug', required=False, type=bool, dest='debug', default=False)
 
     return parser
 
@@ -78,11 +74,15 @@ def ssh_connect(host, port, user, password, command):
     try:
         drac_con = paramiko.SSHClient()
         drac_con.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        drac_con.connect(host, port=port, username=user, password=password)
+        drac_con.connect(hostname=host, port=port, username=user, password=password)
+        transport = drac_con.get_transport()
+        status = transport.is_authenticated()
+        if not status:
+            drac_con.get_transport().auth_interactive_dumb(user)
         stdin, stdout, stderr = drac_con.exec_command(command)
         stdin.close()
-
         return stdout.readlines()
+
     except Exception as e:
         print("UNKNOWN: Unable to run ssh racadm by SSH:  {}".format(e))
         sys.exit(3)
