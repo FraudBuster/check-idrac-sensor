@@ -1,13 +1,14 @@
 # check-idrac-sensor
-[![Build Status](https://travis-ci.com/lagooj/check-idrac-sensor.svg?branch=master)](https://travis-ci.com/lagooj/check-idrac-sensor)
 
-Forked and reworked from https://github.com/hobbsh/check-idrac-sensor
+Forked from https://github.com/lagooj/check-idrac-sensor
+
+which itself was forked from https://github.com/hobbsh/check-idrac-sensor
 
 Icinga / nagios check script utilizing racadm by ssh to check getsensorinfo endpoint
 
 ## Purpose
 
-This check script uses racadm thought ssh, to check sensorinfo output from a Dell iDRAC without any 
+This check script uses racadm through ssh, to check sensorinfo output from a Dell iDRAC without any 
 further dependencies except paramiko.
 
 ## Requirements
